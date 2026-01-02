@@ -2,94 +2,125 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Live TV Admin Panel</title>
 <style>
-body{background:#050505;color:#0ff;font-family:monospace;padding:20px}
-input,button{width:100%;padding:10px;margin:8px 0;background:#111;color:#0ff;border:1px solid #0ff}
+body {
+  background:#050505;
+  color:#0ff;
+  font-family: monospace;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  background: #111;
+  color: #0ff;
+  border: 1px solid #0ff;
+  border-radius: 5px;
+}
+
+h2,h3 { text-align: center; }
+
+.channel-item {
+  background: #111;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #0ff;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.channel-actions button {
+  width: auto;
+  margin-left: 5px;
+  background:#ff0;
+  color:#000;
+  border:none;
+  cursor:pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+}
 </style>
 </head>
 <body>
 
 <h2>Admin Login</h2>
-<input id="pin" type="password" placeholder="PIN">
+<input id="pin" type="password" placeholder="Enter PIN">
 <button onclick="login()">Login</button>
 
 <div id="panel" style="display:none">
-
   <h3>Add Channel</h3>
   <input id="name" placeholder="Channel Name">
   <input id="url" placeholder="Stream URL (m3u8)">
-  <button onclick="addChannel()">Add Channel</button>
+  <button onclick="save()">Save</button>
 
-  <h3>Saved Channels</h3>
-  <div id="list"></div>
-
+  <h3>Channels List</h3>
+  <div id="channelList"></div>
 </div>
 
 <script>
-const ADMIN_PIN = "4321";
-
+const ADMIN_PIN="4321";
 function login(){
-  if(pin.value === ADMIN_PIN){
-    panel.style.display = "block";
-    pin.style.display = "none";
-    loadChannels();
-  } else {
-    alert("Wrong PIN");
-  }
+  if(pin.value===ADMIN_PIN){
+    panel.style.display="block";
+    pin.style.display="none";
+    event.target.style.display="none"; // hide login button
+    renderChannels();
+  } else alert("Wrong PIN");
 }
 
-function getChannels(){
-  return JSON.parse(localStorage.getItem("channels") || "[]");
+function save(){
+  if(!name.value || !url.value){ alert("Fill all fields!"); return; }
+  const arr=JSON.parse(localStorage.getItem("channels")||"[]");
+  arr.push({name:name.value, src:url.value});
+  localStorage.setItem("channels",JSON.stringify(arr));
+  name.value = url.value = "";
+  renderChannels();
+  alert("Channel Saved");
 }
 
-function saveChannels(arr){
-  localStorage.setItem("channels", JSON.stringify(arr));
-}
-
-function addChannel(){
-  const arr = getChannels();
-  if(!name.value || !url.value){
-    alert("Fill all fields");
-    return;
-  }
-  arr.push({ name: name.value, src: url.value });
-  saveChannels(arr);
-  name.value = "";
-  url.value = "";
-  loadChannels();
-}
-
-function deleteChannel(index){
-  const arr = getChannels();
-  arr.splice(index, 1);
-  saveChannels(arr);
-  loadChannels();
-}
-
-function loadChannels(){
-  const list = document.getElementById("list");
-  const arr = getChannels();
+function renderChannels(){
+  const list = document.getElementById("channelList");
+  const arr = JSON.parse(localStorage.getItem("channels")||"[]");
   list.innerHTML = "";
-
-  if(arr.length === 0){
-    list.innerHTML = "<p>No channels saved</p>";
-    return;
-  }
-
-  arr.forEach((ch, i) => {
+  arr.forEach((ch,index)=>{
     const div = document.createElement("div");
-    div.style.border = "1px solid #0ff";
-    div.style.padding = "8px";
-    div.style.margin = "8px 0";
+    div.className = "channel-item";
     div.innerHTML = `
-      <strong>${ch.name}</strong><br>
-      <small>${ch.src}</small><br>
-      <button onclick="deleteChannel(${i})">🗑 Delete</button>
+      <span>${ch.name} | ${ch.src}</span>
+      <span class="channel-actions">
+        <button onclick="edit(${index})">Edit</button>
+        <button onclick="remove(${index})">Delete</button>
+      </span>
     `;
     list.appendChild(div);
   });
 }
- </script>
+
+function edit(index){
+  const arr = JSON.parse(localStorage.getItem("channels")||"[]");
+  name.value = arr[index].name;
+  url.value = arr[index].src;
+  arr.splice(index,1); // remove old entry
+  localStorage.setItem("channels", JSON.stringify(arr));
+  renderChannels();
+}
+
+function remove(index){
+  const arr = JSON.parse(localStorage.getItem("channels")||"[]");
+  if(confirm("Delete this channel?")){
+    arr.splice(index,1);
+    localStorage.setItem("channels", JSON.stringify(arr));
+    renderChannels();
+  }
+}
+</script>
+
 </body>
-  </html>
+</html>
