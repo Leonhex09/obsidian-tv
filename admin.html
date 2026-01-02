@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<style>
+body{background:#050505;color:#0ff;font-family:monospace;padding:20px}
+input,button{width:100%;padding:10px;margin:8px 0;background:#111;color:#0ff;border:1px solid #0ff}
+</style>
+</head>
+<body>
+
+<h2>Admin Login</h2>
+<input id="pin" type="password" placeholder="PIN">
+<button onclick="login()">Login</button>
+
+<div id="panel" style="display:none">
+<h3>Add Channel</h3>
+<input id="name" placeholder="Channel Name">
+<input id="url" placeholder="Stream URL (m3u8)">
+<button onclick="save()">Save</button>
+</div>
+
+<script>
+const ADMIN_PIN="4321";
+function login(){
+ if(pin.value===ADMIN_PIN){
+  panel.style.display="block";
+  pin.style.display="none";
+ }else alert("Wrong PIN");
+}
+function save(){
+ const arr=JSON.parse(localStorage.getItem("channels")||"[]");
+ arr.push({name:name.value,src:url.value});
+ localStorage.setItem("channels",JSON.stringify(arr));
+ alert("Channel Saved");
+}
+</script>
+
+</body>
+  </html>
