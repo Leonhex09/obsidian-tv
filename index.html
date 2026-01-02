@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Obsidian Live TV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050505">
+<style>
+body{margin:0;background:#050505;color:#0ff;font-family:Arial}
+header{padding:10px;text-align:center;border-bottom:1px solid #0ff}
+.channel-feed{padding:10px}
+.plate{border:1px solid #0ff;padding:10px;margin:10px 0;cursor:pointer}
+video{width:100%;background:#000}
+.status-pill{text-align:center;padding:5px;font-size:12px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header><h2>Obsidian Live TV</h2></header>
+<div class="status-pill">SYSTEM ACTIVE</div>
+<video id="player" controls autoplay></video>
+<div class="channel-feed" id="channels"></div>
+
+<script>
+const defaultChannels=[
+{name:"Demo Channel",src:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}
+];
+const stored=JSON.parse(localStorage.getItem("channels")||"null");
+const channels=stored&&stored.length?stored:defaultChannels;
+const feed=document.getElementById("channels");
+const player=document.getElementById("player");
+
+channels.forEach(ch=>{
+ const d=document.createElement("div");
+ d.className="plate";
+ d.textContent=ch.name;
+ d.onclick=()=>player.src=ch.src;
+ feed.appendChild(d);
+});
+
+let taps=0;
+document.querySelector(".status-pill").onclick=()=>{
+ taps++;
+ if(taps===7) location.href="admin.html";
+};
+
+if("serviceWorker"in navigator){
+ navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+</body>
+  </html>
