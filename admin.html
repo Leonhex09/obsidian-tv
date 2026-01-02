@@ -15,27 +15,81 @@ input,button{width:100%;padding:10px;margin:8px 0;background:#111;color:#0ff;bor
 <button onclick="login()">Login</button>
 
 <div id="panel" style="display:none">
-<h3>Add Channel</h3>
-<input id="name" placeholder="Channel Name">
-<input id="url" placeholder="Stream URL (m3u8)">
-<button onclick="save()">Save</button>
+
+  <h3>Add Channel</h3>
+  <input id="name" placeholder="Channel Name">
+  <input id="url" placeholder="Stream URL (m3u8)">
+  <button onclick="addChannel()">Add Channel</button>
+
+  <h3>Saved Channels</h3>
+  <div id="list"></div>
+
 </div>
 
 <script>
-const ADMIN_PIN="4321";
-function login(){
- if(pin.value===ADMIN_PIN){
-  panel.style.display="block";
-  pin.style.display="none";
- }else alert("Wrong PIN");
-}
-function save(){
- const arr=JSON.parse(localStorage.getItem("channels")||"[]");
- arr.push({name:name.value,src:url.value});
- localStorage.setItem("channels",JSON.stringify(arr));
- alert("Channel Saved");
-}
-</script>
+const ADMIN_PIN = "4321";
 
+function login(){
+  if(pin.value === ADMIN_PIN){
+    panel.style.display = "block";
+    pin.style.display = "none";
+    loadChannels();
+  } else {
+    alert("Wrong PIN");
+  }
+}
+
+function getChannels(){
+  return JSON.parse(localStorage.getItem("channels") || "[]");
+}
+
+function saveChannels(arr){
+  localStorage.setItem("channels", JSON.stringify(arr));
+}
+
+function addChannel(){
+  const arr = getChannels();
+  if(!name.value || !url.value){
+    alert("Fill all fields");
+    return;
+  }
+  arr.push({ name: name.value, src: url.value });
+  saveChannels(arr);
+  name.value = "";
+  url.value = "";
+  loadChannels();
+}
+
+function deleteChannel(index){
+  const arr = getChannels();
+  arr.splice(index, 1);
+  saveChannels(arr);
+  loadChannels();
+}
+
+function loadChannels(){
+  const list = document.getElementById("list");
+  const arr = getChannels();
+  list.innerHTML = "";
+
+  if(arr.length === 0){
+    list.innerHTML = "<p>No channels saved</p>";
+    return;
+  }
+
+  arr.forEach((ch, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #0ff";
+    div.style.padding = "8px";
+    div.style.margin = "8px 0";
+    div.innerHTML = `
+      <strong>${ch.name}</strong><br>
+      <small>${ch.src}</small><br>
+      <button onclick="deleteChannel(${i})">🗑 Delete</button>
+    `;
+    list.appendChild(div);
+  });
+}
+ </script>
 </body>
   </html>
